@@ -1,7 +1,8 @@
 # Imports
-import matplotlib.pyplot as plt
-import pandas as pd
 import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
 
 ##########################################
 ############ PANDAS DATAFRAME ############
@@ -10,50 +11,61 @@ import numpy as np
 # Read CSV file and create a Pandas dataframe
 df = pd.read_csv("Resources/COVID19_data.csv")
 
-# Change column heading "Number of Mentions" to "Total_Deaths" so it's more understandable
-df.rename(columns={"Number of Mentions": "Total_Deaths"}, inplace=True)
+# View first 5 rows and column headers of new dataframe
+df.head()
 
-# Convert "Total_Deaths" column to float for aggregating
-df["Total_Deaths"] = df["Total_Deaths"].str.replace(",", "").astype(float)
+# Replace NaN/blank entries with 0
+df["COVID-19 Deaths"].fillna(0, inplace=True)
 
-# Groupby "Total_Deaths" to find total for each condition
-df = df.groupby("Condition").Total_Deaths.sum().reset_index()
+# Groupby "COVID-19 Deaths" to find total for each condition
+df = df.groupby("Condition")["COVID-19 Deaths"].sum().reset_index()
 
-# Rank total deaths in descending order
-df = df.sort_values("Total_Deaths", ascending=False, ignore_index=True)
+# Convert "COVID-19 Deaths" column to integers
+df["COVID-19 Deaths"] = df["COVID-19 Deaths"].astype("int")
 
-# Drop first two rows/conditions of dataframe ("COVID-19" and "All other conditions and causes") - not helpful for analyzing conditionss
+# Rank totals deaths in descending order
+df = df.sort_values(["COVID-19 Deaths"], ascending=False)
+
+# Drop rows for "COVID-19" and "All other conditions and causes (residual)" - not helpful for determining top underlying conditionss
+df = df.loc[~((df["Condition"] == "COVID-19") | (df["Condition"]
+                                                 == "All other conditions and causes (residual)")), :]
+
 # Reset index
-df = df.drop([df.index[0], df.index[1]]).reset_index(drop=True)
+df = df.reset_index(drop=True)
 
-# Make index start with 1 (so that output df will display ranking number next to each condition)
+# Make index start with 1 (so that output dataframe will display rankings next to each condition)
 df.index = df.index + 1
 
-# Save dataframe as csv file
+# Isolate top 10 conditions and create new variable to store new dataframe
+top_10 = df.iloc[0:10].copy()
+
+# Format totals in "COVID-19 Deaths" column with commas
+top_10["COVID-19 Deaths"] = top_10["COVID-19 Deaths"].apply(lambda x: "{:,}".format(x))
+
+
+# Save top_10 dataframe as csv file
 df.to_csv("Output/Top_10_DataFrame.csv")
+
 
 ##########################################
 ########## MATPLOTLIB PIE CHART ##########
 ##########################################
 
 #  Isolate the top 5 conditions to use for pie chart
-top5 = df.iloc[0:5]
+top5 = df.iloc[0:5].copy()
 
-# Save NAMES for each of the top 5 conditions
-names_top5 = top5["Condition"]
+# Save CONDITIONS for each of the top 5 conditions as list
+conditions_top5 = top5["Condition"]
 
-# Save TOTALS for each of the top 5 conditions
-totals_top5 = top5["Total_Deaths"]
-
-# Convert "Total" column to integer for pie chart calculatons
-df["Total_Deaths"] = df["Total_Deaths"].astype(int)
+# Save DEATHS for each of the top 5 conditions as list
+deaths_top5 = top5["COVID-19 Deaths"]
 
 # Esthetics
 colors = ["lightcoral", "gold", "lightskyblue", "red", "green"]
 explode = (0.1, 0, 0)
 
 #  Create pie chart
-plt.pie(totals_top5, labels=names_top5, colors=colors,
+plt.pie(deaths_top5, labels=conditions_top5, colors=colors,
         autopct="%1.1f%%", shadow=True, startangle=250, radius=1.2)
 
 # Chart title
