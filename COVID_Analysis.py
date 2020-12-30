@@ -10,20 +10,17 @@ import numpy as np
 # Read CSV file and create a Pandas dataframe
 df = pd.read_csv("Resources/COVID19_data.csv")
 
-# Drop unnecessary columns ("Date as of," "Start Week," "End Week," "State," "Condition Group")
-df.drop(df.columns[[0, 1, 2, 3, 4, 9]], axis=1, inplace=True)
-
-# Change column heading "Number of Mentions" to "Total" so it's more understandable
-df.rename(columns={"Number of Mentions": "Total"}, inplace=True)
+# Change column heading "Number of Mentions" to "Total_Deaths" so it's more understandable
+df.rename(columns={"Number of Mentions": "Total_Deaths"}, inplace=True)
 
 # Convert "Total" column to float for aggregating
-df["Total"] = df["Total"].str.replace(",", "").astype(float)
+df["Total_Deaths"] = df["Total_Deaths"].str.replace(",", "").astype(float)
 
 # Groupby "Total" to find total for each condition
-df = df.groupby("Condition").Total.sum().reset_index()
+df = df.groupby("Condition").Total_Deaths.sum().reset_index()
 
 # Rank totals in descending order
-df = df.sort_values("Total", ascending=False)
+df = df.sort_values("Total_Deaths", ascending=False)
 
 # Reset index and make it start with 1 (instad of default 0)
 df = df.reset_index(drop=True)
@@ -50,10 +47,10 @@ top5 = df.iloc[0:5]
 names_top5 = top5["Condition"]
 
 # Save TOTALS for each of the top 5 conditions
-totals_top5 = top5["Total"]
+totals_top5 = top5["Total_Deaths"]
 
 # Convert "Total" column to integer for pie chart calculatons
-df["Total"] = df["Total"].astype(int)
+df["Total_Deaths"] = df["Total_Deaths"].astype(int)
 
 # Esthetics
 colors = ["lightcoral", "gold", "lightskyblue", "red", "green"]
