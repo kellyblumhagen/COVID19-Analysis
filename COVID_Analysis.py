@@ -11,9 +11,6 @@ import matplotlib.pyplot as plt
 # Read CSV file and create a Pandas dataframe
 df = pd.read_csv("Resources/COVID19_data.csv")
 
-# View first 5 rows and column headers of new dataframe
-df.head()
-
 # Replace NaN/blank entries with 0
 df["COVID-19 Deaths"].fillna(0, inplace=True)
 
@@ -42,8 +39,7 @@ top_10 = df.iloc[0:10].copy()
 # Format totals in "COVID-19 Deaths" column with commas
 top_10["COVID-19 Deaths"] = top_10["COVID-19 Deaths"].apply(lambda x: "{:,}".format(x))
 
-
-# Save top_10 dataframe as csv file
+# Save top_10 dataframe to csv file
 df.to_csv("Output/Top_10_DataFrame.csv")
 
 
@@ -73,6 +69,3 @@ plt.title("Top 5 Underlying Health Conditions for COVID-19 Deaths")
 
 # Save chart
 plt.savefig("Output/COVID_piechart.png")
-
-# Show chart
-plt.show()
